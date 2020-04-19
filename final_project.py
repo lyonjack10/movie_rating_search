@@ -15,6 +15,47 @@ CACHE_FILE_NAME = 'cache_proj.json'
 client_key = secrets.api_key
 CACHE_DICT = {}
 
+def load_cache():
+    ''' Opens the cache file if it exists and loads the JSON into
+    the CACHE_DICT dictionary.
+    if the cache file doesn't exist, creates a new cache dictionary
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    The opened cache: dict
+    '''
+    try:
+        cache_file = open(CACHE_FILE_NAME, 'r')
+        cache_file_contents = cache_file.read()
+        cache = json.loads(cache_file_contents)
+        cache_file.close()
+    except:
+        cache = {}
+    return cache
+
+
+def save_cache(cache):
+    ''' Saves the current state of the cache to disk
+
+    Parameters
+    ----------
+    cache_dict: dict
+        The dictionary to save
+
+    Returns
+    -------
+    None
+    '''
+
+    cache_file = open(CACHE_FILE_NAME, 'w')
+    contents_to_write = json.dumps(cache)
+    cache_file.write(contents_to_write)
+    cache_file.close()
+
 class Movie:
     '''a Movie
 
@@ -57,13 +98,56 @@ class Movie:
         '''
         return  self.title + ' (' + self.year + ')' + ': ' + self.rating_value + self.genre
 
+def make_url_request_using_cache(url, cache):
+    '''Check the cache for a saved result for this url+cache
+    combo. If the result is found, return it. Otherwise send a new
+    request, save it, then return it.
+
+    Parameters
+    ----------
+    baseurl: string
+        The URL for the national sites endpoint
+    params: dict
+        A dictionary of param:value pairs
+
+    Returns
+    -------
+    dict
+        the results of the query as a dictionary loaded from cache
+        JSON
+    '''
+    if (url in cache.keys()): # the url is our unique key
+        print("Using cache")
+        return cache[url]
+    else:
+        print("Fetching")
+        response = requests.get(url)
+        cache[url] = response.text
+        save_cache(cache)
+        return cache[url]
+
 def create_movie_dict():
+    ''' Makes a Dictionary the movie title and year"
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    dict
+        key is a movie title and value is the year
+        e.g. {'michigan':'https://www.nps.gov/state/mi/index.htm', ...}
+    '''
+
     titles = []
     years =[]
 
     url = 'https://www.imdb.com/list/ls068082370/'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    response = make_url_request_using_cache(url, load_cache())
+    soup = BeautifulSoup(response, 'html.parser')
+    # response = requests.get(url)
+    # soup = BeautifulSoup(response.text, 'html.parser')
     for movie in soup.find_all(class_ = 'lister-item-header'):
         title = movie.find('a').contents[0]
         titles.append(title)
@@ -75,6 +159,16 @@ def create_movie_dict():
 x = create_movie_dict()
 
 def create_csv(movies_data):
+    '''Function creates a csv file from a dictionary.
+
+        Parameters:
+        -----------
+        Dictionary
+
+        Returns:
+        --------
+        CSV File
+        '''
     with open('dict.csv', 'w', newline="") as csv_file:
         writer = csv.writer(csv_file)
         for key, value in movies_data.items():
@@ -100,9 +194,9 @@ def create_db():
         CREATE TABLE IF NOT EXISTS 'Movies'(
             'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
             'Title' TEXT NOT NULL,
-            'Runtime' TEXT NOT NULL,
-            'Rated' TEXT NOT NULL,
-            'Country' TEXT NOT NULL
+            'IMDb' TEXT NOT NULL,
+            'Metascore' TEXT NOT NULL,
+            'Rotten Tomatoes' TEXT NOT NULL
             )
     '''
     cur.execute(drop_imdb_sql)
@@ -114,107 +208,6 @@ def create_db():
 
 create_db()
 
-
-def load_movies():
-    base_url = client_key
-    movies = requests.get(base_url).json()
-
-    insert_movies_sql = '''
-        INSERT INTO Movies
-        VALUES (NULL, ?, ?, ?, ?)
-    '''
-
-    conn = sqlite3.connect('movies.sqlite')
-    cur = conn.cursor()
-    for m in movies:
-        cur.execute(insert_movies_sql,
-            [
-                m[0:6],
-                m[1],
-                m[2],
-                m[2]
-            ]
-        )
-    conn.commit()
-    conn.close()
-load_movies()
-
-
-def load_imdb():
-
-    titles = []
-    years =[]
-
-
-    url = 'https://www.imdb.com/list/ls068082370/'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    for movie in soup.find_all(class_ = 'lister-item-header'):
-        title = movie.find('a').contents[0]
-        titles.append(title)
-        year = movie.find('span', class_ = 'lister-item-year text-muted unbold').text.strip()
-        years.append(year)
-        movie_data = dict(zip(titles, years))
-
-
-    insert_imdb_sql = '''
-        INSERT INTO IMDb
-        VALUES (NULL, ?, NULL)
-    '''
-
-    conn = sqlite3.connect('movies.sqlite')
-    cur = conn.cursor()
-    for k in movie_data:
-        cur.execute(insert_imdb_sql,
-        [
-            k[0:],
-        ]
-    )
-
-    conn.commit()
-    conn.close()
-load_imdb()
-
-def load_cache():
-    ''' Opens the cache file if it exists and loads the JSON into
-    the CACHE_DICT dictionary.
-    if the cache file doesn't exist, creates a new cache dictionary
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    The opened cache: dict
-    '''
-    try:
-        cache_file = open(CACHE_FILE_NAME, 'r')
-        cache_file_contents = cache_file.read()
-        cache = json.loads(cache_file_contents)
-        cache_file.close()
-    except:
-        cache = {}
-    return cache
-
-
-def save_cache(cache):
-    ''' Saves the current state of the cache to disk
-
-    Parameters
-    ----------
-    cache_dict: dict
-        The dictionary to save
-
-    Returns
-    -------
-    None
-    '''
-
-    cache_file = open(CACHE_FILE_NAME, 'w')
-    contents_to_write = json.dumps(cache)
-    cache_file.write(contents_to_write)
-    cache_file.close()
 
 def construct_unique_key(baseurl, params):
     ''' constructs a key that is guaranteed to uniquely and
@@ -273,10 +266,21 @@ def make_request_with_cache(baseurl, params):
         return CACHE_DICT[request_key]
 
 def info_from_OMDb_results(search_term):
+    '''Obtain API data from OMDb API.
+
+    Parameters
+    ----------
+    site_object: search_term
+        a movie title
+
+    Returns
+    -------
+        Formatted movie scores
+    '''
+
     baseurl = 'http://www.omdbapi.com/?i=tt3896198&apikey=e1f94c56'
     params = {'t': search_term}
     response = make_request_with_cache(baseurl, params = params)
-
 
     search_results = response['Ratings']
 
@@ -302,18 +306,36 @@ def plot_year():
     fig_ = fig.show()
     return fig_
 
+def plot_ratings():
+    ratings=['IMNDb', 'Rotten Tomatoes', 'Metacritic']
+
+    fig = go.Figure(data=[
+        go.Bar(name='The Shawshank Redemption', x=ratings, y=[93, 90, 80]),
+        go.Bar(name='The Godfather', x=ratings, y=[92, 98, 100]),
+        go.Bar(name='The Dark Knight', x =ratings, y=[90, 94, 84]),
+        go.Bar(name='The Godfather: Part II', x =ratings, y=[90, 97, 90]),
+        go.Bar(name='Pulp Fiction', x =ratings, y=[89, 92, 94]),
+    ])
+
+    fig.update_layout(barmode='group')
+    fig_ = fig.show()
+    return fig_
+
 if __name__ == "__main__":
 
     count  = 0
     while count >= 0:
         count += 1
         search_term = input("Enter a search term to get Movie Ratings, or 'quit' to exit, or 'graph' \n")
-        search_term.lower()
         if search_term == 'graph':
-            plot_year()
+            new_search = input("Enter 'year' for most common years , or 'ratings' for the top 5 movies \n")
+            if new_search == 'year':
+                plot_year()
+            if new_search == 'ratings':
+                plot_ratings()
         if search_term == "exit":
             exit()
-        if search_term.isalpha():
+        if search_term != 'exit':
             try:
                 info_from_OMDb_results(search_term)
             except KeyError:
