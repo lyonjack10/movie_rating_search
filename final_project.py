@@ -186,7 +186,7 @@ def create_db():
             "Id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "Title" TEXT NOT NULL,
             "Year" TEXT NOT NULL,
-            "Box Office" TEXT NOT NULL,
+            "Box Office" TEXT NOT NULL
         )
     '''
     create_movies_sql = '''
