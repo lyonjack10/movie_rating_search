@@ -185,7 +185,8 @@ def create_db():
         CREATE TABLE IF NOT EXISTS "IMDb" (
             "Id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "Title" TEXT NOT NULL,
-            "Year"
+            "Year" TEXT NOT NULL,
+            "Box Office" TEXT NOT NULL,
         )
     '''
     create_movies_sql = '''
