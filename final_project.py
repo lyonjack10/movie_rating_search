@@ -15,6 +15,33 @@ CACHE_FILE_NAME = 'cache_proj.json'
 client_key = secrets.api_key
 CACHE_DICT = {}
 
+
+def create_movies_csv():
+    '''
+    prints the api call for the top 100 movies that will allow to be manipulated into a csv
+    '''
+    titles = []
+    years = []
+
+    url = 'https://www.imdb.com/list/ls068082370/'
+
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    for movie in soup.find_all(class_ = 'lister-item-header'):
+        title = movie.find('a').contents[0]
+        titles.append(title)
+        year = movie.find('span', class_ = 'lister-item-year text-muted unbold').text.strip()
+        years.append(year)
+        movies_data = dict(zip(titles, years))
+
+    for k,v in movies_data.items():
+        loc={'t':k }
+        response = requests.get('http://www.omdbapi.com/?i=tt3896198&apikey=e1f94c56', params=loc).json()
+        print(response)
+        with open('data.csv', 'w', encoding='utf-8') as file_obj:
+            json.dump(response, file_obj, ensure_ascii=False, indent=2)
+    return response
+
 def load_cache():
     ''' Opens the cache file if it exists and loads the JSON into
     the CACHE_DICT dictionary.
@@ -56,47 +83,6 @@ def save_cache(cache):
     cache_file.write(contents_to_write)
     cache_file.close()
 
-class Movie:
-    '''a Movie
-
-    Instance Attributes
-    -------------------
-    title: string
-        the the title of the Movie (e.g. 'Rambo')
-
-    year: string
-        year the Movie was released
-
-    rating_value: string
-        the IMDb rating of the Movie
-
-    count: string
-        the total votes on IMDb
-
-    summary: string
-        the summary of the Movie's plot
-    '''
-
-    def __init__(self, title = 'no title', year = 'no year', rating_value = 'no rating' , metascore = 'no metascore', genre = 'no genre' ):
-                self.title = title
-                self.year =  year
-                self.rating_value = rating_value
-                self.metascore = metascore
-                self.genre = genre
-
-
-    def info(self):
-        '''Function retrieves information on self. Formats the information into a readable str.
-
-        Parameters:
-        -----------
-        None
-
-        Returns:
-        --------
-        str: formatted string
-        '''
-        return  self.title + ' (' + self.year + ')' + ': ' + self.rating_value + self.genre
 
 def make_url_request_using_cache(url, cache):
     '''Check the cache for a saved result for this url+cache
@@ -154,7 +140,6 @@ def create_movie_dict():
         movies_data = dict(zip(titles, years))
     return(movies_data)
 
-x = create_movie_dict()
 
 def create_csv(movies_data):
     '''Function creates a csv file from a dictionary.
@@ -172,10 +157,9 @@ def create_csv(movies_data):
         for key, value in movies_data.items():
             writer.writerow([key, value])
 
-create_csv(x)
 
 def create_db():
-    conn = sqlite3.connect('movies.sqlite')
+    conn = sqlite3.connect('movies_2.sqlite')
     cur = conn.cursor()
 
     drop_imdb_sql = 'DROP TABLE IF EXISTS "IMDb"'
@@ -206,6 +190,32 @@ def create_db():
     conn.close()
 
 create_db()
+
+def load_movies():
+    file_contents = open('data.csv', 'r')
+    csv_reader = csv.reader(file_contents)
+    next(csv_reader)
+
+
+    insert_movie_sql = '''
+        INSERT INTO Movies
+        VALUES (NULL, ?, ?, ?, ?)
+    '''
+
+    conn = sqlite3.connect('movies_2.sqlite')
+    cur = conn.cursor()
+    for row in csv_reader:
+
+        cur.execute(insert_movie_sql, [
+            row[0], # Company
+            row[1], # SpecificBeanBarName
+            row[2], # REF
+            row[3], # ReviewDate
+        ])
+    conn.commit()
+    conn.close()
+
+load_movies()
 
 
 def construct_unique_key(baseurl, params):

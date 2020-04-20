@@ -5,3 +5,6 @@ Secrets.py
 __pycache__
 sql.py
 Scatter.html
+data.csv
+movies_2.sqlite
+test.py
