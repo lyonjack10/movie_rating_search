@@ -334,6 +334,18 @@ def plot_bottom_ratings():
     fig_ = fig.show()
     return fig_
 
+def plot_boxoffice():
+
+    xvals = ['The Shawshank Redemption','The Godfather', 'The Dark Knight','The Godfather: Part II', 'Pulp Fiction' ]
+    yvals = [2834000, 134940000, 534860000, 57300000, 107930000]
+
+    scatter_data = go.Scatter(x=xvals, y=yvals)
+    basic_layout = go.Layout(title="A Scatter(Line) Plot")
+    fig = go.Figure(data=scatter_data, layout=basic_layout)
+
+    fig_ = fig.write_html("scatter.html", auto_open=True)
+    return fig_
+
 if __name__ == "__main__":
 
     count  = 0
@@ -341,8 +353,9 @@ if __name__ == "__main__":
         count += 1
         search_term = input("Enter a search term to get Movie Ratings, or 'quit' to exit, or 'graph' \n")
         while search_term == 'graph':
-            new_search = input("Enter 'year' for most common years , or 'ratings', or 'back' to return to search \n")
-            if new_search == 'back':
+            new_search = input("Enter 'year' for most common years , or 'ratings', or 'box'  \n")
+            if new_search == 'box':
+                plot_boxoffice()
                 break
             if new_search == 'year':
                 plot_year()
