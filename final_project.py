@@ -340,16 +340,23 @@ if __name__ == "__main__":
     while count >= 0:
         count += 1
         search_term = input("Enter a search term to get Movie Ratings, or 'quit' to exit, or 'graph' \n")
-        if search_term == 'graph':
-            new_search = input("Enter 'year' for most common years , or 'ratings' \n")
+        while search_term == 'graph':
+            new_search = input("Enter 'year' for most common years , or 'ratings', or 'back' to return to search \n")
+            if new_search == 'back':
+                break
             if new_search == 'year':
                 plot_year()
+                break
             if new_search == 'ratings':
                 second_search = input("Enter 'top' for top ratings , or 'bottom' for the bottom 5 movies \n")
                 if second_search == 'top':
                     plot_top_ratings()
-                if second_search == 'bottom':
+                    break
+                elif second_search == 'bottom':
                     plot_bottom_ratings()
+                    break
+                else:
+                    print("Enter 'top' for top ratings , or 'bottom' for the bottom 5 movies \n")
         if search_term == "exit":
             exit()
         if search_term != 'exit':
