@@ -152,7 +152,7 @@ def create_csv(movies_data):
         --------
         CSV File
         '''
-    with open('dict.csv', 'w', newline="") as csv_file:
+    with open('dict_2.csv', 'w', newline="") as csv_file:
         writer = csv.writer(csv_file)
         for key, value in movies_data.items():
             writer.writerow([key, value])
@@ -207,15 +207,40 @@ def load_movies():
     for row in csv_reader:
 
         cur.execute(insert_movie_sql, [
-            row[0], # Company
-            row[1], # SpecificBeanBarName
-            row[2], # REF
-            row[3], # ReviewDate
+            row[0],
+            row[15],#IMDB
+            row[16], #META
+            row[18], #ROTTEN
         ])
     conn.commit()
     conn.close()
 
 load_movies()
+
+def load_imdb():
+    file_contents = open('dict_2.csv', 'r')
+    csv_reader = csv.reader(file_contents)
+    next(csv_reader)
+
+
+    insert_movie_sql = '''
+        INSERT INTO IMDb
+        VALUES (NULL, ?, ?, ?)
+    '''
+
+    conn = sqlite3.connect('movies_2.sqlite')
+    cur = conn.cursor()
+    for row in csv_reader:
+
+        cur.execute(insert_movie_sql, [
+            row[0],
+            row[1],
+            row[2],
+        ])
+    conn.commit()
+    conn.close()
+
+load_imdb()
 
 
 def construct_unique_key(baseurl, params):
@@ -305,6 +330,18 @@ def info_from_OMDb_results(search_term):
             print(f"- {source}: {value}")
 
 def plot_year():
+    '''
+    Creates a bar graph of the most common years in the IMDb top 100 list
+
+    Parameters
+    ----------
+    none
+
+    Returns
+    -------
+        bar graph
+
+    '''
     xvals = ['2001', '2003', '1994', '1995', '1999', '2000', '2008', '1980']
     yvals = [7, 5, 4, 4, 4, 4, 4, 3]
 
@@ -316,6 +353,18 @@ def plot_year():
     return fig_
 
 def plot_top_ratings():
+    '''
+    Creates a bar graph of the top 5 movies and there ratings
+
+    Parameters
+    ----------
+    none
+
+    Returns
+    -------
+        bar graph
+
+    '''
     ratings=['IMNDb', 'Rotten Tomatoes', 'Metacritic']
 
     fig = go.Figure(data=[
@@ -331,6 +380,18 @@ def plot_top_ratings():
     return fig_
 
 def plot_bottom_ratings():
+    '''
+    Creates a bar graph of the bottom 5 movies and there ratings
+
+    Parameters
+    ----------
+    none
+
+    Returns
+    -------
+        bar graph
+
+    '''
     ratings=['IMNDb', 'Rotten Tomatoes', 'Metacritic']
 
     fig = go.Figure(data=[
@@ -346,7 +407,18 @@ def plot_bottom_ratings():
     return fig_
 
 def plot_boxoffice():
+    '''
+    Creates a line graph of the the total box office of the top five movies
 
+    Parameters
+    ----------
+    none
+
+    Returns
+    -------
+        bar graph
+
+    '''
     xvals = ['The Shawshank Redemption','The Godfather', 'The Dark Knight','The Godfather: Part II', 'Pulp Fiction' ]
     yvals = [2834000, 134940000, 534860000, 57300000, 107930000]
 
