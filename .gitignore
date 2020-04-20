@@ -3,3 +3,4 @@ cache_proj.json
 dict.csv
 Secrets.py
 __pycache__
+sql.py

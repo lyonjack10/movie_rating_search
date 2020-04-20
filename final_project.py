@@ -116,7 +116,7 @@ def make_url_request_using_cache(url, cache):
         the results of the query as a dictionary loaded from cache
         JSON
     '''
-    if (url in cache.keys()): # the url is our unique key
+    if (url in cache.keys()):
         print("Using cache")
         return cache[url]
     else:
@@ -146,8 +146,6 @@ def create_movie_dict():
     url = 'https://www.imdb.com/list/ls068082370/'
     response = make_url_request_using_cache(url, load_cache())
     soup = BeautifulSoup(response, 'html.parser')
-    # response = requests.get(url)
-    # soup = BeautifulSoup(response.text, 'html.parser')
     for movie in soup.find_all(class_ = 'lister-item-header'):
         title = movie.find('a').contents[0]
         titles.append(title)
@@ -306,7 +304,7 @@ def plot_year():
     fig_ = fig.show()
     return fig_
 
-def plot_ratings():
+def plot_top_ratings():
     ratings=['IMNDb', 'Rotten Tomatoes', 'Metacritic']
 
     fig = go.Figure(data=[
@@ -321,6 +319,21 @@ def plot_ratings():
     fig_ = fig.show()
     return fig_
 
+def plot_bottom_ratings():
+    ratings=['IMNDb', 'Rotten Tomatoes', 'Metacritic']
+
+    fig = go.Figure(data=[
+        go.Bar(name='Once Upon a Time in America', x=ratings, y=[84, 86, 0]),
+        go.Bar(name='3 Idiots', x=ratings, y=[84, 100, 67]),
+        go.Bar(name='Princess Mononoke', x =ratings, y=[84, 93, 76]),
+        go.Bar(name='Vertigo', x =ratings, y=[83, 95, 100]),
+        go.Bar(name='Citezen Kane', x =ratings, y=[83, 100, 100])
+    ])
+
+    fig.update_layout(barmode='group')
+    fig_ = fig.show()
+    return fig_
+
 if __name__ == "__main__":
 
     count  = 0
@@ -328,11 +341,15 @@ if __name__ == "__main__":
         count += 1
         search_term = input("Enter a search term to get Movie Ratings, or 'quit' to exit, or 'graph' \n")
         if search_term == 'graph':
-            new_search = input("Enter 'year' for most common years , or 'ratings' for the top 5 movies \n")
+            new_search = input("Enter 'year' for most common years , or 'ratings' \n")
             if new_search == 'year':
                 plot_year()
             if new_search == 'ratings':
-                plot_ratings()
+                second_search = input("Enter 'top' for top ratings , or 'bottom' for the bottom 5 movies \n")
+                if second_search == 'top':
+                    plot_top_ratings()
+                if second_search == 'bottom':
+                    plot_bottom_ratings()
         if search_term == "exit":
             exit()
         if search_term != 'exit':
