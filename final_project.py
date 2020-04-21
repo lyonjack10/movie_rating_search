@@ -434,7 +434,7 @@ if __name__ == "__main__":
     count  = 0
     while count >= 0:
         count += 1
-        search_term = input("Enter a movie title to get movie ratings, 'graph' for plots, or 'quit' to exit, \n")
+        search_term = input("Enter a movie title to get movie ratings, 'graph' for plots, or 'quit' to exit \n")
         while search_term == 'graph':
             new_search = input("Enter 'year' for most common years , or 'ratings', or 'box'   \n")
             if new_search == 'box':
