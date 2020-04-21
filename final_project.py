@@ -456,6 +456,7 @@ if __name__ == "__main__":
         if search_term == "exit":
             exit()
         if search_term != 'exit':
+            print(f"\n---------------------------------\nSearching Ratings For {search_term.capitalize()}\n---------------------------------")
             try:
                 info_from_OMDb_results(search_term)
             except KeyError:
