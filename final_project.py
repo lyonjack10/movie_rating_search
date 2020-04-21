@@ -434,9 +434,9 @@ if __name__ == "__main__":
     count  = 0
     while count >= 0:
         count += 1
-        search_term = input("Enter a search term to get Movie Ratings, or 'quit' to exit, or 'graph' \n")
+        search_term = input("Enter a movie title to get movie ratings, 'graph' for plots, or 'quit' to exit, \n")
         while search_term == 'graph':
-            new_search = input("Enter 'year' for most common years , or 'ratings', or 'box'  \n")
+            new_search = input("Enter 'year' for most common years , or 'ratings', or 'box'   \n")
             if new_search == 'box':
                 plot_boxoffice()
                 break
@@ -444,15 +444,13 @@ if __name__ == "__main__":
                 plot_year()
                 break
             if new_search == 'ratings':
-                second_search = input("Enter 'top' for top ratings , or 'bottom' for the bottom 5 movies \n")
+                second_search = input("Enter 'top' for the top 5 movies, or 'bottom' for the bottom 5 movies \n")
                 if second_search == 'top':
                     plot_top_ratings()
                     break
                 elif second_search == 'bottom':
                     plot_bottom_ratings()
                     break
-                else:
-                    print("Enter 'top' for top ratings , or 'bottom' for the bottom 5 movies \n")
         if search_term == "exit":
             exit()
         if search_term != 'exit':
@@ -461,4 +459,4 @@ if __name__ == "__main__":
             except KeyError:
                 print('invalid movie')
         else:
-            print('[Error] Enter a proper Movie name')
+            print('[Error] Enter a proper Movie title')
