@@ -451,9 +451,9 @@ if __name__ == "__main__":
                 elif second_search == 'bottom':
                     plot_bottom_ratings()
                     break
-        if search_term == "exit":
+        if search_term == "quit":
             exit()
-        if search_term != 'exit':
+        if search_term != 'quit':
             try:
                 info_from_OMDb_results(search_term)
             except KeyError:
