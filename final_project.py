@@ -375,7 +375,7 @@ def plot_top_ratings():
         go.Bar(name='Pulp Fiction', x =ratings, y=[89, 92, 94]),
     ])
 
-    fig.update_layout(barmode='group')
+    fig.update_layout(barmode='group' )
     fig_ = fig.show()
     return fig_
 
@@ -423,7 +423,7 @@ def plot_boxoffice():
     yvals = [2834000, 134940000, 534860000, 57300000, 107930000]
 
     scatter_data = go.Scatter(x=xvals, y=yvals)
-    basic_layout = go.Layout(title="A Scatter(Line) Plot")
+    basic_layout = go.Layout(title="Total Box Office for the Top 5 Movies on IMDb")
     fig = go.Figure(data=scatter_data, layout=basic_layout)
 
     fig_ = fig.write_html("scatter.html", auto_open=True)
